@@ -71,18 +71,19 @@ class CalBudget:
         window_after = self.browser.window_handles[1]
         self.browser.switch_to.window(window_after)
 
-        print("=========================================================================")
+        self.browser.switch_to.default_content()
+        self.browser.get("https://webank.appplay.co.kr/rcard_main.act")
         time.sleep(6)
         self.browser.implicitly_wait(5)
 
-        self.browser.switch_to.default_content()
-        self.browser.get("https://webank.appplay.co.kr/rcard_main.act")
-
-        # 팝업창 있으면 닫는 로직
-        self.browser.switch_to.frame(self.browser.find_element_by_css_selector("iframe[id^='commonLayer']"))
-        # print(browser.page_source)
-        popupCloseBtn = self.browser.find_element_by_xpath("//button[@class='bt_popClose']")
-        popupCloseBtn.send_keys(Keys.ENTER)
+        # 팝업창 있으면 닫는 로직        
+        try:
+            self.browser.switch_to.frame(self.browser.find_element_by_css_selector("iframe[id^='commonLayer']"))
+            # print(browser.page_source)
+            popupCloseBtn = self.browser.find_element_by_xpath("//button[@class='bt_popClose']")
+            popupCloseBtn.send_keys(Keys.ENTER)
+        except:
+            print("팝업 없음")
 
         #상세 버튼 클릭
         self.browser.switch_to.default_content()
@@ -91,13 +92,24 @@ class CalBudget:
         detailBtn.click()
         time.sleep(3)
 
-        print(self.startDtTt+"~"+self.endDtTt)
         #값 세팅
         startDt = self.browser.find_element_by_xpath("//input[@id='START_DT']")
         startDt.send_keys(self.startDtTt)
 
         endDt = self.browser.find_element_by_xpath("//input[@id='END_DT']")
         endDt.send_keys(self.endDtTt)
+        time.sleep(1)
+
+        #값 체크 후 한번 더 넣어주기
+        while startDt.get_attribute('value') != self.startDtTt:
+            startDt.send_keys(self.startDtTt)
+            if startDt.get_attribute('value') == self.startDtTt:
+                break
+            
+        while endDt.get_attribute('value') != self.endDtTt:
+            endDt.send_keys(self.endDtTt)
+            if endDt.get_attribute('value') == self.endDtTt:
+                break
 
         cmItem = Select(self.browser.find_element_by_xpath("//select[@id='cmItem_list']"))
         cmItem.select_by_value("00")
